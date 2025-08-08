@@ -1,19 +1,33 @@
 // src/pages/HomePage.jsx
-import React from "react";
+import React, { useEffect, useContext } from "react";
 import {
   Box,
   Typography,
   Button,
   AppBar,
   Toolbar,
-  Container,
 } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
 
 export default function HomePage() {
+  const { usuario, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!usuario) {
+      navigate("/login");
+    }
+  }, [usuario, navigate]);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#e3f2fd" }}>
-      {/* HEADER FIXO, SOMENTE O NOME DA LOJA */}
+      {/* HEADER FIXO, COM NOME DA LOJA E BOTÃO SAIR */}
       <AppBar
         position="fixed"
         sx={{
@@ -22,7 +36,7 @@ export default function HomePage() {
           boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
         }}
       >
-        <Toolbar sx={{ justifyContent: "center" }}>
+        <Toolbar sx={{ justifyContent: "space-between" }}>
           <Typography
             variant="h6"
             component="div"
@@ -30,6 +44,20 @@ export default function HomePage() {
           >
             Tech Store
           </Typography>
+
+          {usuario && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Typography variant="body1" sx={{ color: "white" }}>
+                Bem-vindo, {usuario}!
+              </Typography>
+              <Button
+                onClick={handleLogout}
+                sx={{ color: "white", fontWeight: "bold" }}
+              >
+                Sair
+              </Button>
+            </Box>
+          )}
         </Toolbar>
       </AppBar>
 

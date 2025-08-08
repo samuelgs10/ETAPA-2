@@ -15,8 +15,11 @@ import {
   Container,
   Link as MuiLink,
   TextField,
+  CardActions,
 } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { Link } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
 
@@ -24,6 +27,12 @@ export default function ProductsPage() {
   const { addToCart, cartItems } = useCart();
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Campos do CRUD
+  const [nome, setNome] = useState("");
+  const [preco, setPreco] = useState("");
+  const [thumbnail, setThumbnail] = useState("");
+  const [editIndex, setEditIndex] = useState(null);
 
   const category = "smartphones";
   const limit = 20;
@@ -47,17 +56,59 @@ export default function ProductsPage() {
   }, []);
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-
-  // Calcula valor total considerando pricePix * quantidade
   const totalValue = cartItems.reduce(
     (sum, item) => sum + item.pricePix * item.quantity,
     0
   );
 
-  // Filtra produtos pelo título conforme searchTerm (case insensitive)
   const filteredProducts = products.filter((prod) =>
-    prod.title.toLowerCase().includes(searchTerm.toLowerCase())
+    prod.title
+      ? prod.title.toLowerCase().includes(searchTerm.toLowerCase())
+      : prod.nome?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Adicionar ou atualizar produto manual
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!nome || !preco || !thumbnail) return;
+
+    if (editIndex !== null) {
+      const novos = [...products];
+      novos[editIndex] = {
+        nome,
+        price: parseFloat(preco),
+        pricePix: parseFloat(preco) * 0.9,
+        thumbnail,
+      };
+      setProducts(novos);
+      setEditIndex(null);
+    } else {
+      setProducts([
+        ...products,
+        {
+          nome,
+          price: parseFloat(preco),
+          pricePix: parseFloat(preco) * 0.9,
+          thumbnail,
+        },
+      ]);
+    }
+    setNome("");
+    setPreco("");
+    setThumbnail("");
+  };
+
+  const handleEdit = (index) => {
+    const p = products[index];
+    setNome(p.title || p.nome);
+    setPreco(p.price);
+    setThumbnail(p.thumbnail);
+    setEditIndex(index);
+  };
+
+  const handleDelete = (index) => {
+    setProducts(products.filter((_, i) => i !== index));
+  };
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f5faff" }}>
@@ -116,10 +167,47 @@ export default function ProductsPage() {
         </Toolbar>
       </AppBar>
 
-      {/* Barra de pesquisa centralizada logo abaixo do AppBar */}
+      {/* Formulário CRUD */}
+      <Container sx={{ mt: 12, mb: 4, bgcolor: "white", p: 2, borderRadius: 2, boxShadow: 2 }}>
+        <Typography variant="h6" color="#1565c0" mb={2}>
+          {editIndex !== null ? "Atualizar Produto" : "Adicionar Produto"}
+        </Typography>
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}
+        >
+          <TextField
+            label="Nome"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            size="small"
+            required
+          />
+          <TextField
+            label="Preço"
+            type="number"
+            value={preco}
+            onChange={(e) => setPreco(e.target.value)}
+            size="small"
+            required
+          />
+          <TextField
+            label="Imagem (URL)"
+            value={thumbnail}
+            onChange={(e) => setThumbnail(e.target.value)}
+            size="small"
+            required
+          />
+          <Button type="submit" variant="contained" color="primary">
+            {editIndex !== null ? "Atualizar" : "Adicionar"}
+          </Button>
+        </Box>
+      </Container>
+
+      {/* Barra de pesquisa */}
       <Box
         sx={{
-          mt: 10,
           mb: 2,
           display: "flex",
           justifyContent: "center",
@@ -152,6 +240,7 @@ export default function ProductsPage() {
         </Button>
       </Box>
 
+      {/* Lista de produtos */}
       <Container maxWidth="lg" sx={{ pb: 4 }}>
         <Typography
           variant="h4"
@@ -159,15 +248,15 @@ export default function ProductsPage() {
           fontFamily="Arial, sans-serif"
           color="#0d47a1"
         >
-          Celulares Apple
+          Celulares Apple & Produtos Adicionados
         </Typography>
 
         <Grid container spacing={2}>
           {filteredProducts.length === 0 ? (
-            <Typography>Nenhum celular Apple encontrado.</Typography>
+            <Typography>Nenhum produto encontrado.</Typography>
           ) : (
-            filteredProducts.map((prod) => (
-              <Grid item xs={12} sm={6} md={4} key={prod.id}>
+            filteredProducts.map((prod, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index}>
                 <Card
                   sx={{
                     display: "flex",
@@ -187,7 +276,7 @@ export default function ProductsPage() {
                     component="img"
                     height="180"
                     image={prod.thumbnail}
-                    alt={prod.title}
+                    alt={prod.title || prod.nome}
                     sx={{ objectFit: "contain", bgcolor: "#e3f2fd", p: 1 }}
                   />
                   <CardContent sx={{ flexGrow: 1 }}>
@@ -197,9 +286,7 @@ export default function ProductsPage() {
                       gutterBottom
                       color="#1976d2"
                     >
-                      {prod.title.length > 60
-                        ? prod.title.slice(0, 60) + "..."
-                        : prod.title}
+                      {prod.title || prod.nome}
                     </Typography>
                     <Typography variant="body2" color="#1565c0" sx={{ mb: 1 }}>
                       Preço: R$ {prod.price.toFixed(2).replace(".", ",")}
@@ -208,18 +295,23 @@ export default function ProductsPage() {
                       PIX: R$ {prod.pricePix.toFixed(2).replace(".", ",")}
                     </Typography>
                   </CardContent>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => addToCart({ ...prod, quantity: 1 })}
-                    sx={{
-                      m: 1,
-                      bgcolor: "#1976d2",
-                      "&:hover": { bgcolor: "#0d47a1" },
-                    }}
-                  >
-                    Adicionar ao Carrinho
-                  </Button>
+                  <CardActions sx={{ justifyContent: "space-between" }}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => addToCart({ ...prod, quantity: 1 })}
+                    >
+                      Adicionar ao Carrinho
+                    </Button>
+                    <Box>
+                      <IconButton color="warning" onClick={() => handleEdit(index)}>
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton color="error" onClick={() => handleDelete(index)}>
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
+                  </CardActions>
                 </Card>
               </Grid>
             ))
