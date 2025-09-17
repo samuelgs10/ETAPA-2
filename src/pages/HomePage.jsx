@@ -1,12 +1,6 @@
 // src/pages/HomePage.jsx
 import React, { useEffect, useContext } from "react";
-import {
-  Box,
-  Typography,
-  Button,
-  AppBar,
-  Toolbar,
-} from "@mui/material";
+import { Box, Typography, Button, AppBar, Toolbar } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
 
@@ -27,7 +21,7 @@ export default function HomePage() {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#e3f2fd" }}>
-      {/* HEADER FIXO, COM NOME DA LOJA E BOTÃO SAIR */}
+      {/* HEADER FIXO */}
       <AppBar
         position="fixed"
         sx={{
@@ -37,11 +31,7 @@ export default function HomePage() {
         }}
       >
         <Toolbar sx={{ justifyContent: "space-between" }}>
-          <Typography
-            variant="h6"
-            component="div"
-            sx={{ fontWeight: "bold", color: "white" }}
-          >
+          <Typography variant="h6" sx={{ fontWeight: "bold", color: "white" }}>
             Tech Store
           </Typography>
 
@@ -61,7 +51,7 @@ export default function HomePage() {
         </Toolbar>
       </AppBar>
 
-      {/* CORPO DA PÁGINA EM TELA CHEIA */}
+      {/* CORPO DA PÁGINA */}
       <Box
         sx={{
           height: "100vh",
@@ -83,15 +73,12 @@ export default function HomePage() {
           Bem-vindo à Tech Store!
         </Typography>
 
-        <Typography
-          variant="h6"
-          color="#1976d2"
-          sx={{ mb: 4, maxWidth: 600 }}
-        >
+        <Typography variant="h6" color="#1976d2" sx={{ mb: 4, maxWidth: 600 }}>
           A melhor loja para encontrar os últimos lançamentos da Apple com os
           melhores preços do mercado.
         </Typography>
 
+        {/* BOTÃO VER PRODUTOS */}
         <Button
           component={Link}
           to="/produtos"
@@ -103,9 +90,32 @@ export default function HomePage() {
             px: 4,
             py: 1.5,
             borderRadius: 2,
+            mb: 2,
           }}
         >
           Ver Produtos
+        </Button>
+
+        {/* BOTÃO ACESSAR PRODUCT2V */}
+        <Button
+          component={Link}
+          to="/product_2v"
+          variant="outlined"
+          sx={{
+            borderColor: "#1976d2",
+            color: "#1976d2",
+            fontWeight: "bold",
+            px: 4,
+            py: 1.5,
+            borderRadius: 2,
+            "&:hover": {
+              bgcolor: "#e3f2fd",
+              borderColor: "#0d47a1",
+              color: "#0d47a1",
+            },
+          }}
+        >
+          Acessar Product 2V
         </Button>
       </Box>
     </Box>

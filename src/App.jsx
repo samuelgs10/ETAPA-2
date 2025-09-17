@@ -10,6 +10,9 @@ import { CartProvider } from "./contexts/CartContext";
 import { AuthProvider, AuthContext } from "./contexts/AuthContext";
 import { Box } from "@mui/material";
 
+// ✅ importe seu Product2vList
+import Product2vList from "./pages/Product2vList";
+
 function AppRoutes() {
   const { usuario } = useContext(AuthContext);
 
@@ -27,6 +30,10 @@ function AppRoutes() {
           <Route path="/produtos" element={<ProductsPage />} />
           <Route path="/carrinho" element={<CartPage />} />
           <Route path="/pedido-confirmado" element={<PedidoConfirmado />} />
+
+          {/* ✅ nova rota para acessar o Product2vList */}
+          <Route path="/product_2v" element={<Product2vList />} />
+
           <Route path="*" element={<Navigate to="/" />} />
         </>
       )}
